@@ -1,0 +1,1 @@
+go build -o edith -ldflags="-X 'github.com/theycallmeloki/edith-cli/cmd/edithctl.version=0.0.1'" main.go
