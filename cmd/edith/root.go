@@ -1,4 +1,4 @@
-package spheron
+package edith
 
 import (
 	"fmt"
