@@ -1,4 +1,4 @@
-# spheron-cli
+# edith-cli
 
 A CLI for Edith & Tripsitter
 
