@@ -1,9 +1,11 @@
 package edith
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -91,6 +93,17 @@ var runCmd = &cobra.Command{
 			}
 		}
 
+		// collect postPushHook from HJSON
+		postPushHook, err := getValueAtKeyPath(jsonObj, "postPushHook.pipeline", ".")
+		if err != nil {
+			fmt.Printf("Error getting value at key path: %v\n", err)
+		} else {
+			fmt.Printf("Running pipeline: %v\n", postPushHook)
+
+			// run the pipeline
+			
+		}
+
 		// read input files from the current directory
 		builderPath := "."
 		builderFiles, err := ioutil.ReadDir(builderPath)
@@ -112,8 +125,24 @@ var runCmd = &cobra.Command{
 
 		fmt.Println(inputFiles)
 
+		// we need to drop the "edith" key from the inputFiles map
+
+		filteredInputFiles := make([]map[string]string, 0)
+		for _, file := range inputFiles {
+			
+			// rule system for filtering out files
+			
+			if file["filename"] != "edith" {
+				filteredInputFiles = append(filteredInputFiles, file)
+			}
+
+		}
+
+		fmt.Println(filteredInputFiles)
+
+
 		buildPayload := map[string]interface{}{
-			"files": filesToFileDict(inputFiles),
+			"files": filesToFileDict(filteredInputFiles),
 			"name":  containerName,
 		}
 
@@ -123,6 +152,52 @@ var runCmd = &cobra.Command{
 		builderImageTag := "laneone/edith-images:" + buildPayload["name"].(string) + "_" + buildPayload["tag"].(string)
 		// print builderImageTag
 		fmt.Println(builderImageTag)
+
+
+		// Send the build payload to the /buildContainer endpoint
+		url := "http://192.168.0.236:8888/buildContainer"
+
+		payloadBytes, _ := json.Marshal(buildPayload)
+		payloadReader := bytes.NewReader(payloadBytes)
+		resp, err := http.Post(url, "application/json", payloadReader)
+
+		if err != nil {
+			fmt.Printf("Error sending build payload: %v\n", err)
+			return
+		}
+
+		defer resp.Body.Close()
+
+		responseBody, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Printf("Error reading response body: %v\n", err)
+			return
+		}
+
+		
+		var responseMap map[string]interface{}
+		err = json.Unmarshal(responseBody, &responseMap)
+		if err != nil {
+			fmt.Printf("Error unmarshalling response body: %v\n", err)
+			return
+		}
+
+		edithImageTag, err := getValueAtKeyPath(responseMap, "edithImageTag", ".")
+		if err != nil {
+			fmt.Printf("Error getting value at key path: %v\n", err)
+		} else {
+			// fmt.Printf("Edith image tag: %v\n", edithImageTag)
+			fmt.Printf("%s\n", edithImageTag)
+		}
+
+		if edithImageTag != builderImageTag {
+			fmt.Printf("Warning! Edith image tag does not match builder image tag, things might not add up\n")
+		}
+
+		
+
+
+
 
 		// TODO: first check if you're able to access Edith baseurl, 
 		// prefer to use Edith's docker daemon to build the container
