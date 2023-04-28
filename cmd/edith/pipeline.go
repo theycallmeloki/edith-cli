@@ -197,12 +197,12 @@ var runCmd = &cobra.Command{
 		
 		// if not, then use local docker daemon to build the container
 		
-		// collect postPushHook from HJSON
-		postPushHook, err := getValueAtKeyPath(jsonObj, "postPushHook.pipeline", ".")
+		// collect postPushHookPipeline from HJSON
+		postPushHookPipeline, err := getValueAtKeyPath(jsonObj, "postPushHook.pipeline", ".")
 		if err != nil {
 			fmt.Printf("Error getting value at key path: %v\n", err)
 		} else {
-			fmt.Printf("Running pipeline: %v\n", postPushHook)
+			fmt.Printf("Running pipeline: %v\n", postPushHookPipeline)
 
 			// run the pipeline
 
@@ -259,6 +259,116 @@ var runCmd = &cobra.Command{
 			// Print the response status and content
 			fmt.Printf("API response status: %s\n", pachctlResp.Status)
 			fmt.Printf("API response body: %s\n", responseBody2)
+			
+		}
+
+		postPushHookK8s, err := getValueAtKeyPath(jsonObj, "postPushHook.k8s", ".")
+		if err != nil {
+			fmt.Printf("Error getting value at key path: %v\n", err)
+		} else {
+			fmt.Printf("Running k8s: %v\n", postPushHookK8s)
+
+			replicas, err := getValueAtKeyPath(jsonObj, "postPushHook.k8s.replicas", ".")
+			if err != nil {
+				fmt.Printf("Error getting value at key path: %v\n", err)
+			}
+
+			minReadySeconds, err := getValueAtKeyPath(jsonObj, "postPushHook.k8s.minReadySeconds", ".")
+			if err != nil {
+				fmt.Printf("Error getting value at key path: %v\n", err)
+			}
+
+			containerPort, err := getValueAtKeyPath(jsonObj, "postPushHook.k8s.containerPort", ".")
+			if err != nil {
+				fmt.Printf("Error getting value at key path: %v\n", err)
+			}
+
+			servicePort, err := getValueAtKeyPath(jsonObj, "postPushHook.k8s.servicePort", ".")
+			if err != nil {
+				fmt.Printf("Error getting value at key path: %v\n", err)
+			}
+
+			nodePort, err := getValueAtKeyPath(jsonObj, "postPushHook.k8s.nodePort", ".")
+			if err != nil {
+				fmt.Printf("Error getting value at key path: %v\n", err)
+			}
+
+			blueGreenDeployment := map[string]interface{}{
+				"apiVersion": "ctl.enisoc.com/v1",
+				"kind":       "BlueGreenDeployment",
+				"metadata": map[string]interface{}{
+					"name": containerName,
+					"labels": map[string]interface{}{
+						"app": containerName,
+					},
+				},
+				"spec": map[string]interface{}{
+					"replicas":         replicas,
+					"minReadySeconds":  minReadySeconds,
+					"selector": map[string]interface{}{
+						"matchLabels": map[string]interface{}{
+							"app": containerName,
+						},
+					},
+					"template": map[string]interface{}{
+						"metadata": map[string]interface{}{
+							"labels": map[string]interface{}{
+								"app": containerName,
+							},
+						},
+						"spec": map[string]interface{}{
+							"containers": []interface{}{
+								map[string]interface{}{
+									"name":  containerName,
+									"image": edithImageTag,
+									"ports": []interface{}{
+										map[string]interface{}{
+											"containerPort": containerPort,
+										},
+									},
+									"imagePullPolicy": "Always",
+								},
+							},
+						},
+					},
+					"service": map[string]interface{}{
+						"metadata": map[string]interface{}{
+							"name": "{{ containerName }}-svc",
+							"labels": map[string]interface{}{
+								"app": containerName,
+							},
+						},
+						"spec": map[string]interface{}{
+							"type": "NodePort",
+							"selector": map[string]interface{}{
+								"app": containerName,
+							},
+							"ports": []interface{}{
+								map[string]interface{}{
+									"port":       servicePort,
+									"targetPort": containerPort,
+									"protocol":   "TCP",
+									"nodePort":   nodePort,
+								},
+							},
+						},
+					},
+				},
+			}
+
+			blueGreenDeploymentBytes, _ := json.Marshal(blueGreenDeployment)
+
+			// Create a reader from the JSON payload bytes
+
+			blueGreenDeploymentReader := bytes.NewReader(blueGreenDeploymentBytes)
+
+			// Set the target URL for the API
+
+			blueGreenDeploymentUrl := "http://192.168.0.127:8890/runK8sCommand"
+
+			// Make the POST request
+
+			blueGreenDeploymentResp, err := http.Post(blueGreenDeploymentUrl, "application/json", blueGreenDeploymentReader)
 			
 		}
 
