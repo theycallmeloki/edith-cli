@@ -224,6 +224,16 @@ const ansiblePlaybook = `
           - name: Display kubectl version
             debug:
               msg: "{{ stable_kubectl_version.stdout }}"
+        
+        - name: Download pachctl_1.12.5_amd64.deb
+          get_url:
+            url: https://github.com/pachyderm/pachyderm/releases/download/v1.12.5/pachctl_1.12.5_amd64.deb
+            dest: /tmp/pachctl_1.12.5_amd64.deb
+            mode: 0644
+
+        - name: Install pachctl
+          ansible.builtin.apt:
+            deb: /tmp/pachctl_1.12.5_amd64.deb
 
         - name: Create Minikube service file
           copy:
