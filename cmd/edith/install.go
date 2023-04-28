@@ -235,6 +235,29 @@ const ansiblePlaybook = `
           ansible.builtin.apt:
             deb: /tmp/pachctl_1.12.5_amd64.deb
 
+        - name: Ensure kubefwd Docker image is present
+          docker_image:
+            name: "txn2/kubefwd"
+            source: pull
+    
+        - name: Run kubefwd container
+          docker_container:
+            name: default
+            image: txn2/kubefwd
+            command: services -n default
+            state: started
+            recreate: yes
+            privileged: yes
+            interactive: yes
+            tty: yes
+            volumes:
+              - "{{ lookup('env', 'HOME') }}/.kube/:/root/.kube/"
+          register: kubefwd_container
+    
+        - name: Display kubefwd container information
+          debug:
+            var: kubefwd_container
+
         - name: Create Minikube service file
           copy:
             content: |
