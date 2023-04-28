@@ -145,7 +145,7 @@ var runCmd = &cobra.Command{
 
 
 		// Send the build payload to the /buildContainer endpoint
-		url := "http://192.168.0.236:8888/buildContainer"
+		url := "http://192.168.0.127:8890/buildContainer"
 
 		payloadBytes, _ := json.Marshal(buildPayload)
 		payloadReader := bytes.NewReader(payloadBytes)
@@ -220,7 +220,7 @@ var runCmd = &cobra.Command{
 		pachctlCommandLinePayloadReader1 := bytes.NewReader(pachctlCommandLinePayloadBytes1)
 
 		// Create a new HTTP request
-		pachctlCommandLineRequest1, err := http.Post("http://192.168.0.236:8888/runPachctlCommand", "application/json", pachctlCommandLinePayloadReader1)
+		pachctlCommandLineRequest1, err := http.Post("http://192.168.0.127:8888/runPachctlCommand", "application/json", pachctlCommandLinePayloadReader1)
 		if err != nil {
 			fmt.Printf("Error creating HTTP request: %v\n", err)
 			return
@@ -238,7 +238,7 @@ var runCmd = &cobra.Command{
 		// Print the response body
 		fmt.Printf("Response body: %s\n", pachctlCommandLineResponseBody1)
 
-		transformCmd, err := getValueAtKeyPath(jsonObj, "postPushHook.transform.cmd", ".")
+		transformCmd, err := getValueAtKeyPath(jsonObj, "postPushHook.pipeline.transform.cmd", ".")
 
 		pachctlPipelinePayload := map[string]interface{}{
 			"pipeline": map[string]interface{}{
@@ -268,7 +268,7 @@ var runCmd = &cobra.Command{
 		pachctlCommandLinePayloadReader := bytes.NewReader(pachctlCommandLinePayloadBytes)
 
 		// Set the target URL for the API
-		pachctlUrl := "http://192.168.0.236:8888/runPachctlCommand"
+		pachctlUrl := "http://192.168.0.127:8888/runPachctlCommand"
 
 		// Make the POST request
 		pachctlResp, err := http.Post(pachctlUrl, "application/json", pachctlCommandLinePayloadReader)
