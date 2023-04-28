@@ -205,92 +205,94 @@ var runCmd = &cobra.Command{
 			fmt.Printf("Running pipeline: %v\n", postPushHook)
 
 			// run the pipeline
+
+			transformCmd, err := getValueAtKeyPath(jsonObj, "postPushHook.pipeline.transform.cmd", ".")
+
+			pachctlPipelinePayload := map[string]interface{}{
+				"pipeline": map[string]interface{}{
+					"name": containerName,
+				},
+				"input": pipelineConfigInput,
+				"transform": map[string]interface{}{
+					"cmd": transformCmd,
+					"image_pull_secrets": []string{"laneonekey"},
+					"image": edithImageTag,
+				},
+			}
+
+			// Prepare the payload with the command arguments
+			stdinBytes, _ := json.Marshal(pachctlPipelinePayload)
+
+			// Prepare the payload with the command arguments
+			pachctlCommandLinePayload := map[string]interface{}{
+				"args":  []string{"create", "pipeline", "-f", "-"},
+				"stdin": string(stdinBytes),
+			}
+
+			// Marshal the payload to JSON
+			pachctlCommandLinePayloadBytes, _ := json.Marshal(pachctlCommandLinePayload)
+
+			// Create a reader from the JSON payload bytes
+			pachctlCommandLinePayloadReader := bytes.NewReader(pachctlCommandLinePayloadBytes)
+
+			// Set the target URL for the API
+			pachctlUrl := "http://192.168.0.127:8890/runPachctlCommand"
+
+			// Make the POST request
+			pachctlResp, err := http.Post(pachctlUrl, "application/json", pachctlCommandLinePayloadReader)
+
+			if err != nil {
+				fmt.Printf("Error making API request: %v\n", err)
+				return
+			}
+
+			defer pachctlResp.Body.Close()
+
+
+			// Read the entire response body
+			responseBody2, err := ioutil.ReadAll(pachctlResp.Body)
+			if err != nil {
+				fmt.Printf("Error reading response body: %v\n", err)
+				return
+			}
+
+			// Print the response status and content
+			fmt.Printf("API response status: %s\n", pachctlResp.Status)
+			fmt.Printf("API response body: %s\n", responseBody2)
 			
 		}
 
-		pachctlCommandLinePayload1 := map[string]interface{}{
-			"args":  []string{"create", "repo", "blends"},
-			"stdin": "",
-		}
+		// pachctlCommandLinePayload1 := map[string]interface{}{
+		// 	"args":  []string{"create", "repo", "blends"},
+		// 	"stdin": "",
+		// }
 
-		pachctlCommandLinePayloadBytes1, _ := json.Marshal(pachctlCommandLinePayload1)
+		// pachctlCommandLinePayloadBytes1, _ := json.Marshal(pachctlCommandLinePayload1)
 
-		// Create a reader from the JSON payload bytes
+		// // Create a reader from the JSON payload bytes
 
-		pachctlCommandLinePayloadReader1 := bytes.NewReader(pachctlCommandLinePayloadBytes1)
+		// pachctlCommandLinePayloadReader1 := bytes.NewReader(pachctlCommandLinePayloadBytes1)
 
-		// Create a new HTTP request
-		pachctlCommandLineRequest1, err := http.Post("http://192.168.0.127:8888/runPachctlCommand", "application/json", pachctlCommandLinePayloadReader1)
-		if err != nil {
-			fmt.Printf("Error creating HTTP request: %v\n", err)
-			return
-		}
+		// // Create a new HTTP request
+		// pachctlCommandLineRequest1, err := http.Post("http://192.168.0.127:8890/runPachctlCommand", "application/json", pachctlCommandLinePayloadReader1)
+		// if err != nil {
+		// 	fmt.Printf("Error creating HTTP request: %v\n", err)
+		// 	return
+		// }
 
-		defer pachctlCommandLineRequest1.Body.Close()
+		// defer pachctlCommandLineRequest1.Body.Close()
 
-		// Read the response body
-		pachctlCommandLineResponseBody1, err := ioutil.ReadAll(pachctlCommandLineRequest1.Body)
-		if err != nil {
-			fmt.Printf("Error reading response body: %v\n", err)
-			return
-		}
+		// // Read the response body
+		// pachctlCommandLineResponseBody1, err := ioutil.ReadAll(pachctlCommandLineRequest1.Body)
+		// if err != nil {
+		// 	fmt.Printf("Error reading response body: %v\n", err)
+		// 	return
+		// }
 
-		// Print the response body
-		fmt.Printf("Response body: %s\n", pachctlCommandLineResponseBody1)
+		// // Print the response body
+		// fmt.Printf("Response body: %s\n", pachctlCommandLineResponseBody1)
 
-		transformCmd, err := getValueAtKeyPath(jsonObj, "postPushHook.pipeline.transform.cmd", ".")
-
-		pachctlPipelinePayload := map[string]interface{}{
-			"pipeline": map[string]interface{}{
-				"name": containerName,
-			},
-			"input": pipelineConfigInput,
-			"transform": map[string]interface{}{
-				"cmd": transformCmd,
-				"image_pull_secrets": []string{"laneonekey"},
-				"image": edithImageTag,
-			},
-		}
-
-		// Prepare the payload with the command arguments
-		stdinBytes, _ := json.Marshal(pachctlPipelinePayload)
-
-		// Prepare the payload with the command arguments
-		pachctlCommandLinePayload := map[string]interface{}{
-			"args":  []string{"create", "pipeline", "-f", "-"},
-			"stdin": string(stdinBytes),
-		}
-
-		// Marshal the payload to JSON
-		pachctlCommandLinePayloadBytes, _ := json.Marshal(pachctlCommandLinePayload)
-
-		// Create a reader from the JSON payload bytes
-		pachctlCommandLinePayloadReader := bytes.NewReader(pachctlCommandLinePayloadBytes)
-
-		// Set the target URL for the API
-		pachctlUrl := "http://192.168.0.127:8888/runPachctlCommand"
-
-		// Make the POST request
-		pachctlResp, err := http.Post(pachctlUrl, "application/json", pachctlCommandLinePayloadReader)
-
-		if err != nil {
-			fmt.Printf("Error making API request: %v\n", err)
-			return
-		}
-
-		defer pachctlResp.Body.Close()
-
-
-		// Read the entire response body
-		responseBody2, err := ioutil.ReadAll(pachctlResp.Body)
-		if err != nil {
-			fmt.Printf("Error reading response body: %v\n", err)
-			return
-		}
-
-		// Print the response status and content
-		fmt.Printf("API response status: %s\n", pachctlResp.Status)
-		fmt.Printf("API response body: %s\n", responseBody2)
+		
 
 
 		// pachctlPipelinePayloadBytes, _ := json.Marshal(pachctlPipelinePayload)
