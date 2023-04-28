@@ -1,0 +1,90 @@
+{
+  "containerName": "blender-framesplitter",
+  "prePushHook": {
+    "cmdList": [
+      "echo \"Greetings. about to build 🫡 \"",
+    ]
+  },
+  "postPushHook": {
+    "k8s": {
+      "replicas": 1,
+      "minReadySeconds": 5, 
+      "containerPort": 8080,
+      "servicePort": 80,
+      "nodePort": 31000,
+    },
+    "pipeline": {
+      "input": {
+        "pfs": {
+          "glob": "/*",
+          "repo": "blends"
+        }
+      },
+      "transform": {
+        "cmd": ["python3", "/splitter.py", "process", "blends"],
+      }
+    }
+  }
+}
+
+// {
+//   "containerName": "blender-framesplitter",
+//   "prePushHook": {
+//     "cmdList": [
+//       // "pachctl delete repo splitter",
+//       // "pachctl delete pipeline splitter",
+//       // "pachctl delete repo blends",
+//       "echo \"hello\"",
+//     ]
+//   },
+//   "postPushHook": {
+//     // "cmdList": ["pachctl create pipeline -f /tmp/thispipeline.json"],
+//     "k8s": {
+//       "replicas": 1,
+//       "minReadySeconds": 5, 
+//       "containerPort": 8080,
+//       "servicePort": 80,
+//       "nodePort": 31000,
+//     },
+//     "pipeline": {
+//     //   "pipeline": {
+//     //     "name": "splitter"
+//     //   },
+//       "input": {
+//         "pfs": {
+//           "glob": "/*",
+//           "repo": "blends"
+//         }
+//       },
+//       "transform": {
+//         // "image_pull_secrets": [
+//         //   "laneonekey"
+//         // ],
+//         "cmd": ["python3", "/splitter.py", "process", "blends"],
+//       }
+//     }
+//   }
+// }
+
+
+// {
+//   "containerName": "hwga-dwdori",
+//   "tag": "v0.0.7",
+//   "prePushHook": {
+//     "cmdList": [
+//       "git clone git@github.com:theycallmeloki/hwga-dwdori.git staging/hwga-dwdori",
+//       "cp staging/hwga-dwdori/.env ./containers/hwga-dwdori/.env",
+//       "mv staging/hwga-dwdori/* ./containers/hwga-dwdori"
+//     ]
+//   },
+//   "postPushHook": {
+//     "cmdList": [],
+    // "k8s": {
+    //   "replicas": 1,
+    //   "minReadySeconds": 5, 
+    //   "containerPort": 8080,
+    //   "servicePort": 80,
+    //   "nodePort": 31000
+    // }
+//   }
+// }

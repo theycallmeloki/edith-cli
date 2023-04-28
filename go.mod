@@ -8,7 +8,10 @@ require (
 	github.com/spf13/viper v1.15.0
 )
 
-require github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
+require (
+	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
+	github.com/hjson/hjson-go v3.3.0+incompatible // indirect
+)
 
 require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
