@@ -114,7 +114,7 @@ var runCmd = &cobra.Command{
 		// }
 
 		// fmt.Println(inputFiles)
-		inputFiles, err := collectFiles(builderPath)
+		inputFiles, err := CollectFiles(builderPath)
 		if err != nil {
 			fmt.Printf("Error collecting files from directory %s: %v\n", builderPath, err)
 			return

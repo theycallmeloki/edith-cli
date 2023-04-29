@@ -16,6 +16,7 @@ import (
 
 	// "github.com/manifoldco/promptui"
 	homedir "github.com/mitchellh/go-homedir"
+	gitignore "github.com/sabhiram/go-gitignore"
 	"github.com/spf13/viper"
 	"github.com/theycallmeloki/Edith-cli/pkg/edith"
 )
@@ -151,19 +152,31 @@ func WriteLocalConfig() {
 }
 
 
-func collectFiles(root string) ([]map[string]string, error) {
+func CollectFiles(root string) ([]map[string]string, error) {
 	inputFiles := make([]map[string]string, 0)
 
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+	gitignorePath := filepath.Join(root, ".gitignore")
+	ignore, err := gitignore.CompileIgnoreFile(gitignorePath)
+	if os.IsNotExist(err) {
+		ignore = &gitignore.GitIgnore{}
+	} else if err != nil {
+		return nil, fmt.Errorf("error reading .gitignore file: %v", err)
+	}
+
+	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 		if !info.IsDir() {
-			data, err := ioutil.ReadFile(path)
-			if err != nil {
-				return fmt.Errorf("error reading file %s: %v", path, err)
+			// Check if the path is ignored
+			relPath, _ := filepath.Rel(root, path)
+			if !ignore.MatchesPath(relPath) {
+				data, err := ioutil.ReadFile(path)
+				if err != nil {
+					return fmt.Errorf("error reading file %s: %v", path, err)
+				}
+				inputFiles = append(inputFiles, map[string]string{"filename": relPath, "data": string(data)})
 			}
-			inputFiles = append(inputFiles, map[string]string{"filename": path, "data": string(data)})
 		}
 		return nil
 	})
