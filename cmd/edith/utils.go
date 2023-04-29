@@ -2,10 +2,14 @@ package edith
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
+
 	// "log"
 	"strconv"
 
@@ -18,8 +22,68 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	gitignore "github.com/sabhiram/go-gitignore"
 	"github.com/spf13/viper"
-	"github.com/theycallmeloki/Edith-cli/pkg/edith"
+	edith "github.com/theycallmeloki/Edith-cli/pkg/edith"
 )
+
+// runCommandOnCloud handles running commands on the cloud
+func runCommandOnCloud(cmd string, args []string, stdinBytes []byte) error {
+	// Check if the command is 'pachctl' or 'kubectl'
+	if cmd == "pachctl" || cmd == "kubectl" {
+		
+
+		// Your logic for running the command on the builder goes here
+		// Example: Make an API call
+		fmt.Println("Executing on Edith:", cmd, args)
+
+		// assemble a payload
+		payload := map[string]interface{}{
+			"args": args,
+			"stdin": string(stdinBytes),
+		}
+
+		url := edith.EDITH_BASE_URL 
+
+		if cmd == "pachctl" {
+			url += "/runPachctlCommand"
+		} else if cmd == "kubectl" {
+			url += "/runKubectlCommand"
+		}
+
+		// Marshal the payload to JSON
+		genericCommandLinePayloadBytes, _ := json.Marshal(payload)
+
+		// Create a reader from the JSON payload bytes
+		genericCommandLinePayloadReader := bytes.NewReader(genericCommandLinePayloadBytes)
+
+		// Make the API call
+		pachctlResp, err := http.Post(url, "application/json", genericCommandLinePayloadReader)
+
+		if err != nil {
+			fmt.Printf("Error making API request: %v\n", err)
+			return err
+		}
+
+		defer pachctlResp.Body.Close()
+
+
+		// Read the entire response body
+		responseBody2, err := ioutil.ReadAll(pachctlResp.Body)
+		if err != nil {
+			fmt.Printf("Error reading response body: %v\n", err)
+			return err
+		}
+
+		// Print the response status and content
+		fmt.Printf("API response status: %s\n", pachctlResp.Status)
+		fmt.Printf("API response body: %s\n", responseBody2)
+
+
+	} else {
+		return fmt.Errorf("unsupported command for cloud execution: %s", cmd)
+	}
+
+	return nil
+}
 
 // create config file function
 func SetEdithConfigFile() {

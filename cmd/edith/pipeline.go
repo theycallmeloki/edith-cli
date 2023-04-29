@@ -84,36 +84,39 @@ var runCmd = &cobra.Command{
 				fmt.Printf("%v\n", cmd)
 
 				actualCmd := strings.Split(cmd.(string), " ")
-				runCmd := exec.Command(actualCmd[0], actualCmd[1:]...)
-				runCmd.Stdout = os.Stdout
-				runCmd.Stderr = os.Stderr
-				err = runCmd.Run()
-				if err != nil {
-					fmt.Println("Error running pre-push hook: \n", err)
-				}
 
+				// Check if the command starts with "!", if yes, run it locally
+				if actualCmd[0][0] == '!' {
+					actualCmd[0] = actualCmd[0][1:]
+					runCmd := exec.Command(actualCmd[0], actualCmd[1:]...)
+					runCmd.Stdout = os.Stdout
+					runCmd.Stderr = os.Stderr
+					err = runCmd.Run()
+					if err != nil {
+						fmt.Println("Error running local pre-push hook: \n", err)
+					}
+				} else {
+					// Stub for running command on the cloud
+					fmt.Println("Running command on the cloud:", cmd)
+					// Your logic for running the command on the cloud goes here
+
+					// Run the command on the cloud using the runCommandOnCloud function
+					var stdinBytes []byte = nil
+					// if strings.Contains(strings.Join(actualCmd, " "), "-") {
+						// stdinBytes, _ = ioutil.ReadAll(os.Stdin)
+					// }
+					err := runCommandOnCloud(actualCmd[0], actualCmd[1:], stdinBytes)
+					if err != nil {
+						fmt.Println("Error running pre-push hook on the cloud: \n", err)
+					}
+				}
 			}
 		}
 
 
 		// read input files from the current directory
 		builderPath := "."
-		// builderFiles, err := ioutil.ReadDir(builderPath)
-		// if err != nil {
-		// 	fmt.Printf("Error reading directory %s: %v\n", builderPath, err)
-		// 	return
-		// } 
-
-		// inputFiles := make([]map[string]string, 0)
-		// for _, bf := range builderFiles {
-		// 	filePath := filepath.Join(builderPath, bf.Name())
-		// 	data, err := ioutil.ReadFile(filePath)
-		// 	if err != nil {
-		// 		fmt.Printf("Error reading file %s: %v\n", filePath, err)
-		// 		continue
-		// 	}
-		// 	inputFiles = append(inputFiles, map[string]string{"filename": bf.Name(), "data": string(data)})
-		// }
+	
 
 		// fmt.Println(inputFiles)
 		inputFiles, err := CollectFiles(builderPath)
@@ -438,63 +441,13 @@ var runCmd = &cobra.Command{
 			fmt.Printf("API response body: %s\n", responseBody3)
 		}
 
-		// pachctlCommandLinePayload1 := map[string]interface{}{
-		// 	"args":  []string{"create", "repo", "blends"},
-		// 	"stdin": "",
-		// }
-
-		// pachctlCommandLinePayloadBytes1, _ := json.Marshal(pachctlCommandLinePayload1)
-
-		// // Create a reader from the JSON payload bytes
-
-		// pachctlCommandLinePayloadReader1 := bytes.NewReader(pachctlCommandLinePayloadBytes1)
-
-		// // Create a new HTTP request
-		// pachctlCommandLineRequest1, err := http.Post("http://192.168.0.127:8890/runPachctlCommand", "application/json", pachctlCommandLinePayloadReader1)
-		// if err != nil {
-		// 	fmt.Printf("Error creating HTTP request: %v\n", err)
-		// 	return
-		// }
-
-		// defer pachctlCommandLineRequest1.Body.Close()
-
-		// // Read the response body
-		// pachctlCommandLineResponseBody1, err := ioutil.ReadAll(pachctlCommandLineRequest1.Body)
-		// if err != nil {
-		// 	fmt.Printf("Error reading response body: %v\n", err)
-		// 	return
-		// }
-
-		// // Print the response body
-		// fmt.Printf("Response body: %s\n", pachctlCommandLineResponseBody1)
-
 		
-
-
-		// pachctlPipelinePayloadBytes, _ := json.Marshal(pachctlPipelinePayload)
-
-		// pachctlPipelinePayloadReader := bytes.NewReader(pachctlPipelinePayloadBytes)
-
-		// pachctlUrl := "http://192.168.0.236:8888/runPachctlCommand"
-
-		// pachctlResp, err := http.Post(pachctlUrl, "application/json", pachctlPipelinePayloadReader)
-
 
 		// TODO: Unmount any repos that are already mounted
 
 		// TODO: Implement MOUNT_SERVER functionality as in the original Python script
 
-		// entrypoint := args[0]
-		// entrypointArgs := args[1:]
-
-		// pythonCmd := exec.Command("python3", append([]string{entrypoint}, entrypointArgs...)...)
-		// pythonCmd.Stdout = os.Stdout
-		// pythonCmd.Stderr = os.Stderr
-		// err = pythonCmd.Run()
-		// if err != nil {
-		// 	fmt.Println("Error running Python script:", err)
-		// }
-
+		
 		// TODO: Implement unmounting repos and stopping the mount server as in the original Python script
 	},
 }
