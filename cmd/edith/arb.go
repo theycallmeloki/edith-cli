@@ -46,6 +46,8 @@ var arbCmd = &cobra.Command{
 			base_url = fmt.Sprintf("https://api.etherscan.io/api?module=account&action=txlist&address=%s&startblock=0&endblock=99999999&page=1&offset=10000&sort=desc&apikey=%s", walletAddress, etherApiKey)
 		} else if chain == "arb" {
 			base_url = fmt.Sprintf("https://api.arbiscan.io/api?module=account&action=txlist&address=%s&startblock=0&endblock=99999999&page=1&offset=10000&sort=desc&apikey=%s", walletAddress, arbiApiKey)
+		} else if chain == "canto" {
+			base_url = fmt.Sprintf("https://evm.explorer.canto.io/api?module=account&action=txlist&address=%s&startblock=0&endblock=99999999&page=1&offset=10000&sort=desc", walletAddress)
 		} else {
 			fmt.Println("Invalid chain")
 			return
@@ -89,7 +91,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&walletAddress, "wallet", "", "Wallet address")
 
 	// Accepting flag for Chain
-	rootCmd.PersistentFlags().StringVar(&chain, "chain", "eth", "Chain name (eth/arb)")
+	rootCmd.PersistentFlags().StringVar(&chain, "chain", "eth", "Chain name (eth/arb/canto)")
 
 	// Accepting flag for Arbiscan API Key
 	rootCmd.PersistentFlags().StringVar(&arbiApiKey, "arbiApiKey", "", "ArbiScan API Key")

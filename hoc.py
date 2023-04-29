@@ -1,7 +1,7 @@
 import json
 import os
 
-chain_types= ["arb", "eth"]
+chain_types= ["arb", "eth", "canto"]
 
 nft_wallets = []
 for i in os.listdir('scratch/wallets'):
