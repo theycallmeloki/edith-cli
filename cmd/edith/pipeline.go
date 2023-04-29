@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+
 	// "path/filepath"
 
 	// "os/exec"
@@ -15,6 +16,7 @@ import (
 
 	"github.com/hjson/hjson-go"
 	"github.com/spf13/cobra"
+	edith "github.com/theycallmeloki/Edith-cli/pkg/edith"
 )
 
 // The main command group
@@ -152,7 +154,7 @@ var runCmd = &cobra.Command{
 
 
 		// Send the build payload to the /buildContainer endpoint
-		url := "http://192.168.0.127:8890/buildContainer"
+		url := edith.EDITH_BASE_URL + "/buildContainer"
 
 		payloadBytes, _ := json.Marshal(buildPayload)
 		payloadReader := bytes.NewReader(payloadBytes)
@@ -243,7 +245,7 @@ var runCmd = &cobra.Command{
 			pachctlCommandLinePayloadReader := bytes.NewReader(pachctlCommandLinePayloadBytes)
 
 			// Set the target URL for the API
-			pachctlUrl := "http://192.168.0.127:8890/runPachctlCommand"
+			pachctlUrl := edith.EDITH_BASE_URL + "/runPachctlCommand"
 
 			// Make the POST request
 			pachctlResp, err := http.Post(pachctlUrl, "application/json", pachctlCommandLinePayloadReader)
@@ -409,7 +411,7 @@ var runCmd = &cobra.Command{
 			// kubectlCommandLinePayloadReader := bytes.NewReader(kubectlCommandLinePayload)
 			// Set the target URL for the API
 
-			blueGreenDeploymentUrl := "http://192.168.0.127:8890/runKubectlCommand"
+			blueGreenDeploymentUrl := edith.EDITH_BASE_URL + "/runKubectlCommand"
 
 			// Make the POST request
 
