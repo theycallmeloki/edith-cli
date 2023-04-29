@@ -344,6 +344,11 @@ var runCmd = &cobra.Command{
 									"imagePullPolicy": "Always",
 								},
 							},
+							"imagePullSecrets": []interface{}{
+								map[string]interface{}{
+									"name": "laneonekey",
+								},
+							},
 						},
 					},
 					"service": map[string]interface{}{
