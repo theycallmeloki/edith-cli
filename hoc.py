@@ -23,4 +23,4 @@ for k in holders.keys():
     for j in chain_types:
         for i in holders[k]:
             print(f"./edith arb --wallet {i} --chain {j} | jq -s . | tee scratch/generated/{i}_{j}_{k}.json")
-            print(f"echo Progress: {i} {str(holders[k].index(i))}/{str(len(holders[k]))} {j} {k} attempting to be generated")
+            print(f"echo Progress: {i} {str((holders[k].index(i))+1)}/{str(len(holders[k]))} {j} {k} attempting to be generated")
