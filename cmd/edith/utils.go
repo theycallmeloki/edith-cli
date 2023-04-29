@@ -5,6 +5,8 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"io/ioutil"
+	// "log"
 	"strconv"
 
 	// "net/http"
@@ -148,11 +150,37 @@ func WriteLocalConfig() {
 	}
 }
 
+
+func collectFiles(root string) ([]map[string]string, error) {
+	inputFiles := make([]map[string]string, 0)
+
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			data, err := ioutil.ReadFile(path)
+			if err != nil {
+				return fmt.Errorf("error reading file %s: %v", path, err)
+			}
+			inputFiles = append(inputFiles, map[string]string{"filename": path, "data": string(data)})
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return inputFiles, nil
+}
+
 func filesToFileDict(inputFiles []map[string]string) map[string]string {
 	output := make(map[string]string)
 	for _, f := range inputFiles {
 		output[f["filename"]] = f["data"]
 	}
+
 	return output
 }
 

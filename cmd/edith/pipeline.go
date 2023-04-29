@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
+	// "path/filepath"
 
 	// "os/exec"
 	"strings"
@@ -96,43 +96,50 @@ var runCmd = &cobra.Command{
 
 		// read input files from the current directory
 		builderPath := "."
-		builderFiles, err := ioutil.ReadDir(builderPath)
-		if err != nil {
-			fmt.Printf("Error reading directory %s: %v\n", builderPath, err)
-			return
-		} 
+		// builderFiles, err := ioutil.ReadDir(builderPath)
+		// if err != nil {
+		// 	fmt.Printf("Error reading directory %s: %v\n", builderPath, err)
+		// 	return
+		// } 
 
-		inputFiles := make([]map[string]string, 0)
-		for _, bf := range builderFiles {
-			filePath := filepath.Join(builderPath, bf.Name())
-			data, err := ioutil.ReadFile(filePath)
-			if err != nil {
-				fmt.Printf("Error reading file %s: %v\n", filePath, err)
-				continue
-			}
-			inputFiles = append(inputFiles, map[string]string{"filename": bf.Name(), "data": string(data)})
+		// inputFiles := make([]map[string]string, 0)
+		// for _, bf := range builderFiles {
+		// 	filePath := filepath.Join(builderPath, bf.Name())
+		// 	data, err := ioutil.ReadFile(filePath)
+		// 	if err != nil {
+		// 		fmt.Printf("Error reading file %s: %v\n", filePath, err)
+		// 		continue
+		// 	}
+		// 	inputFiles = append(inputFiles, map[string]string{"filename": bf.Name(), "data": string(data)})
+		// }
+
+		// fmt.Println(inputFiles)
+		inputFiles, err := collectFiles(builderPath)
+		if err != nil {
+			fmt.Printf("Error collecting files from directory %s: %v\n", builderPath, err)
+			return
 		}
 
-		fmt.Println(inputFiles)
+		// printNestedStructure(inputFiles, "")
 
 		// we need to drop the "edith" key from the inputFiles map
 
-		filteredInputFiles := make([]map[string]string, 0)
-		for _, file := range inputFiles {
+		// filteredInputFiles := make([]map[string]string, 0)
+		// for _, file := range inputFiles {
 			
-			// rule system for filtering out files
+		// 	// rule system for filtering out files
 			
-			if file["filename"] != "edith" {
-				filteredInputFiles = append(filteredInputFiles, file)
-			}
+		// 	if file["filename"] != "edith" {
+		// 		filteredInputFiles = append(filteredInputFiles, file)
+		// 	}
 
-		}
+		// }
 
-		fmt.Println(filteredInputFiles)
+		// fmt.Println(filteredInputFiles)
 
 
 		buildPayload := map[string]interface{}{
-			"files": filesToFileDict(filteredInputFiles),
+			"files": filesToFileDict(inputFiles),
 			"name":  containerName,
 		}
 
@@ -293,6 +300,14 @@ var runCmd = &cobra.Command{
 				fmt.Printf("Error getting value at key path: %v\n", err)
 			}
 
+			containerNameStr, ok := containerName.(string)
+			if !ok {
+				fmt.Println("Error: containerName is not a string")
+				return
+			}
+			serviceName := fmt.Sprintf("%v-svc", containerNameStr)
+
+
 			blueGreenDeployment := map[string]interface{}{
 				"apiVersion": "ctl.enisoc.com/v1",
 				"kind":       "BlueGreenDeployment",
@@ -333,7 +348,7 @@ var runCmd = &cobra.Command{
 					},
 					"service": map[string]interface{}{
 						"metadata": map[string]interface{}{
-							"name": "{{ containerName }}-svc",
+							"name": serviceName,
 							"labels": map[string]interface{}{
 								"app": containerName,
 							},
@@ -356,20 +371,64 @@ var runCmd = &cobra.Command{
 				},
 			}
 
+			// print the JSON payload
+
+			fmt.Println("Blue Green Deployment JSON Payload:")
+
+			printNestedStructure(blueGreenDeployment, "")
+
 			blueGreenDeploymentBytes, _ := json.Marshal(blueGreenDeployment)
 
 			// Create a reader from the JSON payload bytes
 
-			blueGreenDeploymentReader := bytes.NewReader(blueGreenDeploymentBytes)
+			
+			// write the file to disk
+			
+			// err = ioutil.WriteFile("blueGreenDeployment.json", blueGreenDeploymentBytes, 0644)
+			
+			// Prepare the payload with the command arguments
+			kubectlCommandLinePayload := map[string]interface{}{
+				"args":  []string{"apply", "-f", "-"},
+				"stdin": string(blueGreenDeploymentBytes),
+			}
 
+			kubectlCommandLinePayloadBytes, err := json.Marshal(kubectlCommandLinePayload)
+			if err != nil {
+				fmt.Printf("Error marshaling kubectl command line payload: %v\n", err)
+				return
+			}
+
+			// Create a reader from the JSON payload bytes
+			kubectlCommandLinePayloadReader := bytes.NewReader(kubectlCommandLinePayloadBytes)
+			
+			// kubectlCommandLinePayloadReader := bytes.NewReader(kubectlCommandLinePayload)
 			// Set the target URL for the API
 
-			blueGreenDeploymentUrl := "http://192.168.0.127:8890/runK8sCommand"
+			blueGreenDeploymentUrl := "http://192.168.0.127:8890/runKubectlCommand"
 
 			// Make the POST request
 
-			blueGreenDeploymentResp, err := http.Post(blueGreenDeploymentUrl, "application/json", blueGreenDeploymentReader)
+			blueGreenDeploymentResp, err := http.Post(blueGreenDeploymentUrl, "application/json", kubectlCommandLinePayloadReader)
 			
+			if err != nil {
+				fmt.Printf("Error making API request: %v\n", err)
+				return
+			}
+
+			defer blueGreenDeploymentResp.Body.Close()
+
+			// Read the entire response body
+
+			responseBody3, err := ioutil.ReadAll(blueGreenDeploymentResp.Body)
+
+			if err != nil {
+				fmt.Printf("Error reading response body: %v\n", err)
+				return
+			}
+
+			// Print the response status and content
+			fmt.Printf("API response status: %s\n", blueGreenDeploymentResp.Status)
+			fmt.Printf("API response body: %s\n", responseBody3)
 		}
 
 		// pachctlCommandLinePayload1 := map[string]interface{}{
