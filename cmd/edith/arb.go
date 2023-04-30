@@ -68,7 +68,7 @@ var arbCmd = &cobra.Command{
 				SetQueryParams(map[string]string{
 					"keyType": keyType,
 				}).
-				Get("http://127.0.0.1:8888/apiKey")
+				Get(edith.EDITH_BASE_URL+"/apiKey")
 				if err != nil {
 					log.Fatalf("Request failed: %v", err)
 				}
@@ -134,7 +134,7 @@ var arbCmd = &cobra.Command{
 				SetQueryParams(map[string]string{
 					"keyType": keyType,
 				}).
-				Get("http://127.0.0.1:8888/apiKey")
+				Get(edith.EDITH_BASE_URL+"/apiKey")
 				if err != nil {
 					log.Fatalf("Request failed: %v", err)
 				}
