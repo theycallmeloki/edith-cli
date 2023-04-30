@@ -7,10 +7,12 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	
 )
 
 var arbiApiKey string = ""
 var etherApiKey string = ""
+var githubToken string = ""
 
 var configureCmd = &cobra.Command{
 	Use:   "configure",
@@ -31,23 +33,33 @@ edith configure --etherApiKey=<YOUR_ETHER_API_KEY>
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if arbiApiKey == "-" {
-			// fmt.Println("Enter your arbi API key")
+		// if arbiApiKey == "-" {
+		// 	// fmt.Println("Enter your arbi API key")
+		// 	scanner := bufio.NewScanner(os.Stdin)
+		// 	if scanner.Scan() {
+		// 		arbiApiKey = scanner.Text()
+		// 	}
+		// 	viper.Set("arbiApiKey", arbiApiKey)
+
+		// }
+
+		// if etherApiKey == "-" {
+		// 	// fmt.Println("Enter your ether API key")
+		// 	scanner := bufio.NewScanner(os.Stdin)
+		// 	if scanner.Scan() {
+		// 		etherApiKey = scanner.Text()
+		// 	}
+		// 	viper.Set("etherApiKey", etherApiKey)
+
+		// }
+
+		if githubToken == "-" {
+			// fmt.Println("Enter your github token")
 			scanner := bufio.NewScanner(os.Stdin)
 			if scanner.Scan() {
-				arbiApiKey = scanner.Text()
+				githubToken = scanner.Text()
 			}
-			viper.Set("arbiApiKey", arbiApiKey)
-
-		}
-
-		if etherApiKey == "-" {
-			// fmt.Println("Enter your ether API key")
-			scanner := bufio.NewScanner(os.Stdin)
-			if scanner.Scan() {
-				etherApiKey = scanner.Text()
-			}
-			viper.Set("etherApiKey", etherApiKey)
+			viper.Set("githubToken", githubToken)
 
 		}
 
@@ -69,6 +81,7 @@ func init() {
 	rootCmd.AddCommand(pipelineCmd)
 
 	// Accepting flag for Secret API Key
-	configureCmd.Flags().StringVarP(&arbiApiKey, "arbiApiKey", "a", "", "Arbi API Key")
-	configureCmd.Flags().StringVarP(&etherApiKey, "etherApiKey", "e", "", "Ether API Key")
+	// configureCmd.Flags().StringVarP(&arbiApiKey, "arbiApiKey", "a", "", "Arbi API Key")
+	// configureCmd.Flags().StringVarP(&etherApiKey, "etherApiKey", "e", "", "Ether API Key")
+	configureCmd.Flags().StringVarP(&githubToken, "githubToken", "g", "", "Github Token")
 }

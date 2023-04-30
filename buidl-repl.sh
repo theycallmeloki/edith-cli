@@ -2,6 +2,7 @@ python3 hoc.py > run.sh
 
 export ARBI_API_KEY=$(cat scratch/apikeys/arbiApiKey.txt)
 export ETHER_API_KEY=$(cat scratch/apikeys/etherApiKey.txt)
+export GITHUB_TOKEN=$(cat scratch/apikeys/githubToken.txt)
 
 echo '----------------------------------------'
 echo 'dropping previous configuration file' 
@@ -24,15 +25,21 @@ echo 'CMD: edith --help'
 # ./edith --help
 echo '----------------------------------------'
 
-echo '----------------------------------------'
-echo 'CMD: edith configure arbiApiKey'
-echo "$ARBI_API_KEY" | ./edith configure --arbiApiKey -
-echo '----------------------------------------'
+# echo '----------------------------------------'
+# echo 'CMD: edith configure arbiApiKey'
+# echo "$ARBI_API_KEY" | ./edith configure --arbiApiKey -
+# echo '----------------------------------------'
+
+# echo '----------------------------------------'
+# echo 'CMD: edith configure etherApiKey'
+# echo "$ETHER_API_KEY" | ./edith configure --etherApiKey -
+# echo '----------------------------------------'
 
 echo '----------------------------------------'
-echo 'CMD: edith configure etherApiKey'
-echo "$ETHER_API_KEY" | ./edith configure --etherApiKey -
+echo 'CMD: edith configure githubToken'
+echo "$GITHUB_TOKEN" | ./edith configure --githubToken -
 echo '----------------------------------------'
+
 
 echo '----------------------------------------'
 echo 'display current configuration file'
