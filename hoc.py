@@ -27,7 +27,7 @@ for k in holders.keys():
         for i in holders[k]:
             file_path = f"scratch/generated/{i}_{j}_{k}.json"
             print(f"if [ ! -e {file_path} ]; then")
-            print(f"  ./edith arb --wallet {i} --chain {j} | jq -s . | tee {file_path}")
+            print(f"  edith arb --wallet {i} --chain {j} | jq -s . | tee {file_path}")
             print(f"  sleep 1.5")
             print(f"  echo Progress: {i} {str((holders[k].index(i))+1)}/{str(len(holders[k]))} {j} {k} attempting to be generated")
             print(f"else")

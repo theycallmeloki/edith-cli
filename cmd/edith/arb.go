@@ -104,7 +104,7 @@ var arbCmd = &cobra.Command{
 
 				// Use the API key in your application
 				// apiKey := viper.GetString("arbiApiKey")
-				fmt.Printf("API key for %s: %s\n", keyType, apiKey)
+				// fmt.Printf("API key for %s: %s\n", keyType, apiKey)
 				viper.Set("arbiApiKey", apiKey)
 				arbiApiKey = apiKey
 			
@@ -170,7 +170,7 @@ var arbCmd = &cobra.Command{
 
 				// Use the API key in your application
 				// apiKey := viper.GetString("arbiApiKey")
-				fmt.Printf("API key for %s: %s\n", keyType, apiKey)
+				// fmt.Printf("API key for %s: %s\n", keyType, apiKey)
 				viper.Set("etherApiKey", apiKey)
 				etherApiKey = apiKey
 			
