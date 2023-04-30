@@ -1,27 +1,27 @@
 {
-  "containerName": "blender-framesplitter",
+  "containerName": "edith-arb",
   "prePushHook": {
     "cmdList": [
       "echo \"Greetings. about to build 🫡 \"",
     ]
   },
   "postPushHook": {
-    "k8s": {
-      "replicas": 1,
-      "minReadySeconds": 5, 
-      "containerPort": 8080,
-      "servicePort": 80,
-      "nodePort": 31000,
-    },
+    // "k8s": {
+    //   "replicas": 1,
+    //   "minReadySeconds": 5, 
+    //   "containerPort": 8080,
+    //   "servicePort": 80,
+    //   "nodePort": 31000,
+    // },
     "pipeline": {
       "input": {
         "pfs": {
           "glob": "/*",
-          "repo": "blends"
+          "repo": "wallets"
         }
       },
       "transform": {
-        "cmd": ["python3", "/splitter.py", "process", "blends"],
+        "cmd": ["edith", "--chain", "eth", "--wallet", "0xE5E98Df807c3C4F8e57eeeED0968895b2EA5FEfb"],
       }
     }
   }

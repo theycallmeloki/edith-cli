@@ -106,6 +106,7 @@ func SetEdithConfigFile() {
 	viper.AddConfigPath(ConfigDir)
 	viper.SetDefault("arbiApiKey", "")
 	viper.SetDefault("etherApiKey", "")
+	viper.SetDefault("githubToken", "")
 }
 
 
