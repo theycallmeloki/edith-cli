@@ -302,14 +302,12 @@ const ansiblePlaybook = `
           when: not has_pods | default(false)
         
         - name: Display current pods after task
-          shell: kubectl get pods --namespace=default
+          shell: kubectl get pods --namespace=default -o json
           register: updated_pods
         
         - name: Print updated pods after task
-          ansible.builtin.debug:
-            var: item
-          loop:
-            - "Updated pods: {{ updated_pods.resources | json_query('items[*].metadata.name') }}"
+          debug:
+            var: updated_pods.stdout | from_json | json_query('items[].metadata.name')
 
         - name: Create Pachyderm port-forward script
           copy:
