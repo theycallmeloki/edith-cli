@@ -300,6 +300,16 @@ const ansiblePlaybook = `
                 state: present
                 definition: "{{ pachyderm_deployment_yaml.stdout }}"
           when: not has_pods | default(false)
+        
+        - name: Display current pods after task
+          shell: kubectl get pods --namespace=default
+          register: updated_pods
+        
+        - name: Print updated pods after task
+          ansible.builtin.debug:
+            var: item
+          loop:
+            - "Updated pods: {{ updated_pods.resources | json_query('items[*].metadata.name') }}"
 
         - name: Create Pachyderm port-forward script
           copy:
