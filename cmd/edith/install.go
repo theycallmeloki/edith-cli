@@ -299,7 +299,7 @@ const ansiblePlaybook = `
               ansible.builtin.k8s:
                 state: present
                 definition: "{{ pachyderm_deployment_yaml.stdout }}"
-          when: not has_pods
+          when: not has_pods | default(false)
 
         - name: Create Pachyderm port-forward script
           copy:
