@@ -26,6 +26,8 @@ var installCmd = &cobra.Command{
 
 
 		playbookFile := "playbook.yml"
+    homeDir, _ := os.UserHomeDir()
+
 
 		err := ioutil.WriteFile(playbookFile, []byte(ansiblePlaybook), 0644)
 		if err != nil {
@@ -33,7 +35,7 @@ var installCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-    installCommand := exec.Command("ansible-playbook", playbookFile, "-i", "localhost,", "--connection", "local", "--extra-vars", fmt.Sprintf("ansible_user=%s minikube_user_info.passwd.home=/home/minikube_user", getCurrentUsername()))
+    installCommand := exec.Command("ansible-playbook", playbookFile, "-i", "localhost,", "--connection", "local", "--extra-vars", fmt.Sprintf("ansible_user=%s minikube_user_home=%s", getCurrentUsername(), homeDir))
 
 		installCommand.Stdout = os.Stdout
 		installCommand.Stderr = os.Stderr
