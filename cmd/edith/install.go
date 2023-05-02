@@ -235,7 +235,14 @@ const ansiblePlaybook = `
           ansible.builtin.apt:
             deb: /tmp/pachctl_1.12.5_amd64.deb
 
-
+        - name: Create minikube user
+          user:
+            name: minikube_user
+            system: yes
+            create_home: yes
+            home: /home/minikube_user
+            shell: /bin/bash
+        
         - name: Create Minikube service file
           copy:
             content: |
@@ -244,11 +251,11 @@ const ansiblePlaybook = `
               After=network.target
         
               [Service]
-              User={{ ansible_user }}
-              Group={{ ansible_user }}
+              User=minikube_user
+              Group=minikube_user
               Type=oneshot
               RemainAfterExit=yes
-              Environment="MINIKUBE_HOME=/home/{{ ansible_user }}"
+              Environment="MINIKUBE_HOME=/home/minikube_user"
               ExecStart=/usr/local/bin/minikube start --wait=all --cpus=2 --memory=2GB
               ExecStop=/usr/local/bin/minikube stop
         
