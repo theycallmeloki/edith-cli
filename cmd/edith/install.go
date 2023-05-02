@@ -186,6 +186,7 @@ const ansiblePlaybook = `
     - role: gantsign.minikube
       become: no
       become_user: minikube_user
+      minikube_download_dir: "{{ minikube_user_info.home }}/.ansible/tmp/downloads"
 `
 
 // const ansiblePlaybook = `
