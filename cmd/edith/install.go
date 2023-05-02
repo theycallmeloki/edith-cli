@@ -288,7 +288,8 @@ const ansiblePlaybook = `
               ansible.builtin.k8s:
                 state: present
                 definition: "{{ pachyderm_deployment_yaml.stdout }}"
-          when: pachctl_version_result.failed
+          when: "'connection refused' in pachctl_version_result.stdout"
+
           
 
         - name: Create Pachyderm port-forward script
