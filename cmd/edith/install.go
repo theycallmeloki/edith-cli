@@ -270,4 +270,53 @@ const ansiblePlaybook = `
             name: minikube.service
             enabled: yes
             state: started
+
+        - name: Check if pachctl version command succeeds
+          command: pachctl version
+          register: pachctl_version_result
+          failed_when: false
+          changed_when: false
+        
+        - name: Deploy Pachyderm if pachctl version command fails
+          block:
+            - name: Get Pachyderm deployment YAML
+              shell: pachctl deploy local --create-context --dry-run --expose-object-api --no-guaranteed --output yaml
+              register: pachyderm_deployment_yaml
+        
+            - name: Apply Pachyderm deployment YAML
+              become: no
+              ansible.builtin.k8s:
+                state: present
+                definition: "{{ pachyderm_deployment_yaml.stdout }}"
+          when: pachctl_version_result.failed
+          
+
+        - name: Create Pachyderm port-forward script
+          copy:
+            content: |
+              #!/bin/bash
+    
+              # Wait for 2 minutes
+              sleep 120
+    
+              CONFIG_FILE="$HOME/.pachyderm/config.json"
+    
+              if [ -f "$CONFIG_FILE" ]; then
+                if grep -q '"portForwarding"' "$CONFIG_FILE"; then
+                  # Remove "portForwarding" key and save the JSON in place
+                  jq 'del(.portForwarding)' "$CONFIG_FILE" > "$CONFIG_FILE".tmp && mv "$CONFIG_FILE".tmp "$CONFIG_FILE"
+    
+                  # Run pachctl port-forward
+                  pachctl port-forward
+                fi
+              fi
+            dest: /usr/local/bin/pachyderm_port_forward.sh
+            mode: 0755
+    
+        - name: Add cron job for Pachyderm port-forward script
+          ansible.builtin.cron:
+            name: "Pachyderm port-forward script"
+            user: "root"
+            special_time: "reboot"
+            job: "/usr/local/bin/pachyderm_port_forward.sh"
 `
