@@ -235,20 +235,23 @@ const ansiblePlaybook = `
           ansible.builtin.apt:
             deb: /tmp/pachctl_1.12.5_amd64.deb
 
+
         - name: Create Minikube service file
           copy:
             content: |
               [Unit]
               Description=Minikube
               After=network.target
-
+        
               [Service]
+              User={{ ansible_user }}
+              Group={{ ansible_user }}
               Type=oneshot
               RemainAfterExit=yes
               Environment="MINIKUBE_HOME=/home/{{ ansible_user }}"
               ExecStart=/usr/local/bin/minikube start --wait=all --cpus=2 --memory=2GB
               ExecStop=/usr/local/bin/minikube stop
-
+        
               [Install]
               WantedBy=multi-user.target
             dest: /etc/systemd/system/minikube.service
