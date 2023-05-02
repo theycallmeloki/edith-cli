@@ -181,6 +181,13 @@ const ansiblePlaybook = `
         create_home: yes
         home: /home/minikube_user
         shell: /bin/bash
+    
+    - name: Get minikube_user information
+      become: yes
+      ansible.builtin.getent:
+        database: passwd
+        key: minikube_user
+      register: minikube_user_info
 
   roles:
     - role: gantsign.minikube
