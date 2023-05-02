@@ -277,7 +277,7 @@ const ansiblePlaybook = `
             namespace: default
           register: current_pods
 
-        - name: Print current pods before and after task
+        - name: Print current pods before task
           ansible.builtin.debug:
             var: item
           loop:
