@@ -270,6 +270,18 @@ const ansiblePlaybook = `
             name: minikube.service
             enabled: yes
             state: started
+        
+        - name: Display current pods before task
+          ansible.builtin.k8s_info:
+            kind: Pod
+            namespace: default
+          register: current_pods
+
+        - name: Print current pods before and after task
+          ansible.builtin.debug:
+            var: item
+          loop:
+            - "Current pods: {{ current_pods.resources | json_query('items[*].metadata.name') }}"
 
         - name: Check if pachctl version command succeeds
           command: pachctl version
