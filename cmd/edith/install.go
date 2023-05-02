@@ -285,7 +285,7 @@ const ansiblePlaybook = `
 
         - name: Check if there are any pods
           set_fact:
-            has_pods: "{{ 'items' in current_pods.stdout_lines }}"
+            has_pods: "{{ 'items' in current_pods.stdout_lines }} | default([])"
           when: current_pods.stdout_lines is defined
         
         - name: Deploy Pachyderm if pachctl version command fails
