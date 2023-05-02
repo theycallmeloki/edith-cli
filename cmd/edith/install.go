@@ -106,6 +106,8 @@ const ansiblePlaybook = `
 - name: Setup Node
   hosts: all
   become: yes
+  vars:
+    minikube_version: "1.30.1"
   tasks:
     - name: Update packages
       apt:
@@ -174,6 +176,12 @@ const ansiblePlaybook = `
       args:
         executable: /bin/bash
       become: no
+
+    - name: Download minikube binary
+      get_url:
+        url: "https://storage.googleapis.com/minikube/releases/{{ minikube_version }}/minikube-linux-amd64"
+        dest: "{{ minikube_download_dir }}/minikube-linux-amd64-{{ minikube_version }}"
+        mode: '0755'
 
   pre_tasks:
     - name: Create minikube user
