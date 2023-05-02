@@ -283,11 +283,10 @@ const ansiblePlaybook = `
           loop:
             - "Current pods: {{ current_pods.resources | json_query('items[*].metadata.name') }}"
 
-        - name: Check if pachctl version command succeeds
-          command: pachctl version
-          register: pachctl_version_result
-          failed_when: false
-          changed_when: false
+        - name: Check if there are any pods
+          set_fact:
+            has_pods: "{{ 'items' in current_pods.stdout_lines }}"
+          when: current_pods.stdout_lines is defined
         
         - name: Deploy Pachyderm if pachctl version command fails
           block:
@@ -300,7 +299,7 @@ const ansiblePlaybook = `
               ansible.builtin.k8s:
                 state: present
                 definition: "{{ pachyderm_deployment_yaml.stdout }}"
-          when: "'connection refused' in pachctl_version_result.stdout or 'no pods found for app pachd' in pachctl_version_result.stdout"
+          when: not has_pods
 
         - name: Create Pachyderm port-forward script
           copy:
