@@ -251,7 +251,7 @@ const ansiblePlaybook = `
               Type=oneshot
               RemainAfterExit=yes
               Environment="MINIKUBE_HOME=/root"
-              ExecStart=/usr/local/bin/minikube start --wait=all --cpus=2 --memory=2GB --force
+              ExecStart=/usr/local/bin/minikube start --wait=all --cpus=2 --memory=4GB --force
               ExecStop=/usr/local/bin/minikube stop
         
               [Install]
