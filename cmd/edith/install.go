@@ -176,13 +176,22 @@ const ansiblePlaybook = `
         executable: /bin/bash
       become: no
     
-    - name: Run pm2 startup
+    - name: Run pm2 startup and extract command
       shell: |
         export NVM_DIR="$HOME/.nvm"
         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
         pm2 startup
       args:
         executable: /bin/bash
+      become: yes
+      register: pm2_startup_output
+
+    - name: Extract pm2 startup command
+      set_fact:
+        pm2_startup_command: "{{ pm2_startup_output.stdout_lines[-1] }}"
+
+    - name: Run pm2 startup command as superuser
+      shell: "{{ pm2_startup_command }}"
       become: yes
 
     - name: Install Minikube
