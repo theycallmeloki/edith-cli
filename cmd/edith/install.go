@@ -171,7 +171,7 @@ const ansiblePlaybook = `
         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
         nvm install 16.19.1
         nvm use v16.19.1
-        npm i -g npm
+        npm i -g npm pm2
       args:
         executable: /bin/bash
       become: no
