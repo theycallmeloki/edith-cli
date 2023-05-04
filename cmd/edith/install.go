@@ -189,6 +189,10 @@ const ansiblePlaybook = `
     - name: Extract pm2 startup command
       set_fact:
         pm2_startup_command: "{{ pm2_startup_output.stdout_lines[-1][4:] }}"
+    
+    - name: Debug pm2 startup command
+      debug:
+        var: pm2_startup_command
 
     - name: Run pm2 startup command as superuser
       shell: "{{ pm2_startup_command }}"
