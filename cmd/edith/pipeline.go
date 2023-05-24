@@ -232,45 +232,74 @@ var runCmd = &cobra.Command{
 				},
 			}
 
+			serviceValue, serviceErr := getValueAtKeyPath(jsonObj, "service", ".")
+			if serviceErr == nil {
+				pachctlPipelinePayload["service"] = serviceValue
+			}
+
+			spoutValue, spoutErr := getValueAtKeyPath(jsonObj, "spout", ".")
+			if spoutErr == nil {
+				pachctlPipelinePayload["spout"] = spoutValue
+			}
+
 			// Prepare the payload with the command arguments
 			stdinBytes, _ := json.Marshal(pachctlPipelinePayload)
 
-			// Prepare the payload with the command arguments
-			pachctlCommandLinePayload := map[string]interface{}{
-				"args":  []string{"create", "pipeline", "-f", "-"},
-				"stdin": string(stdinBytes),
-			}
-
-			// Marshal the payload to JSON
-			pachctlCommandLinePayloadBytes, _ := json.Marshal(pachctlCommandLinePayload)
-
 			// Create a reader from the JSON payload bytes
-			pachctlCommandLinePayloadReader := bytes.NewReader(pachctlCommandLinePayloadBytes)
+			stdinReader := strings.NewReader(string(stdinBytes))
 
-			// Set the target URL for the API
-			pachctlUrl := edith.EDITH_BASE_URL + "/runPachctlCommand"
+			// Prepare the command
+			cmd := exec.Command("pachctl", "create", "pipeline", "-f", "-")
 
-			// Make the POST request
-			pachctlResp, err := http.Post(pachctlUrl, "application/json", pachctlCommandLinePayloadReader)
+			// Set the command's stdin to the prepared reader
+			cmd.Stdin = stdinReader
+
+			// Run the command
+			err = cmd.Run()
 
 			if err != nil {
-				fmt.Printf("Error making API request: %v\n", err)
-				return
+				fmt.Printf("Error running command: %v\n", err)
 			}
 
-			defer pachctlResp.Body.Close()
+			// Prepare the payload with the command arguments
+			// stdinBytes, _ := json.Marshal(pachctlPipelinePayload)
+
+			// // Prepare the payload with the command arguments
+			// pachctlCommandLinePayload := map[string]interface{}{
+			// 	"args":  []string{"create", "pipeline", "-f", "-"},
+			// 	"stdin": string(stdinBytes),
+			// }
+
+			// // Marshal the payload to JSON
+			// pachctlCommandLinePayloadBytes, _ := json.Marshal(pachctlCommandLinePayload)
+
+			// // Create a reader from the JSON payload bytes
+			// pachctlCommandLinePayloadReader := bytes.NewReader(pachctlCommandLinePayloadBytes)
+
+			// // Set the target URL for the API
+			// pachctlUrl := edith.EDITH_BASE_URL + "/runPachctlCommand"
+
+			// // Make the POST request
+			// pachctlResp, err := http.Post(pachctlUrl, "application/json", pachctlCommandLinePayloadReader)
+
+			// if err != nil {
+			// 	fmt.Printf("Error making API request: %v\n", err)
+			// 	return
+			// }
+
+			// defer pachctlResp.Body.Close()
 
 
-			// Read the entire response body
-			responseBody2, err := ioutil.ReadAll(pachctlResp.Body)
-			if err != nil {
-				fmt.Printf("Error reading response body: %v\n", err)
-				return
-			}
+			// // Read the entire response body
+			// responseBody2, err := ioutil.ReadAll(pachctlResp.Body)
+			// if err != nil {
+			// 	fmt.Printf("Error reading response body: %v\n", err)
+			// 	return
+			// }
 
-			// Print the response status and content
-			fmt.Printf("API response status: %s\n", pachctlResp.Status)
-			fmt.Printf("API response body: %s\n", responseBody2)
+			// // Print the response status and content
+			// fmt.Printf("API response status: %s\n", pachctlResp.Status)
+			// fmt.Printf("API response body: %s\n", responseBody2)
 			
 		}
 

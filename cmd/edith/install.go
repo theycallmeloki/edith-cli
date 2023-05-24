@@ -101,7 +101,42 @@ func getCurrentUsername() string {
 	return strings.TrimSpace(string(output))
 }
 
+const daskPlaybook = `
+- name: Setup Dask
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update packages
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
 
+    - name: Install required dependencies
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - dask
+        - dask-distributed
+    
+    - name: Install nmap
+      apt:
+        name: nmap
+        state: present
+
+    - name: Scan for open SSH ports using nmap
+      command: nmap -p 22 --open 192.168.0.1/24
+      register: nmap_output
+
+    - name: Display open SSH hosts
+      debug:
+        var: nmap_output.stdout_lines
+
+    - name: Install python3-pip
+      apt:
+        name: python3-pip
+        state: present
+`
 
 const ansiblePlaybook = `
 - name: Setup Node
