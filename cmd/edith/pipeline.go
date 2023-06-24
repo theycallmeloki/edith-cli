@@ -129,24 +129,26 @@ var runCmd = &cobra.Command{
 
 		// we need to drop the "edith" key from the inputFiles map
 
-		// filteredInputFiles := make([]map[string]string, 0)
-		// for _, file := range inputFiles {
+		filteredInputFiles := make([]map[string]string, 0)
+		for _, file := range inputFiles {
 			
-		// 	// rule system for filtering out files
+			// rule system for filtering out files
 			
-		// 	if file["filename"] != "edith" {
-		// 		filteredInputFiles = append(filteredInputFiles, file)
-		// 	}
+			if file["filename"] != "edith" {
+				filteredInputFiles = append(filteredInputFiles, file)
+			}
 
-		// }
+		}
 
 		// fmt.Println(filteredInputFiles)
 
 
 		buildPayload := map[string]interface{}{
-			"files": filesToFileDict(inputFiles),
+			"files": filesToFileDict(filteredInputFiles),
 			"name":  containerName,
 		}
+
+		fmt.Println("Build payload: ", filesToFileDict(inputFiles))
 
 		buildPayloadBytes, _ := json.Marshal(buildPayload)
 		buildPayload["tag"] = generateMD5Hash(string(buildPayloadBytes))
