@@ -1,6 +1,7 @@
-# edith-cli
+# Bondman
 
-A CLI for Edith & Tripsitter
+A CLI for Bondman
+*pre llm era it used to be called Edith & Tripsitter, core repls are kept in place but the lines are blurred now due to LLMs*
 
 TODO
 
@@ -10,4 +11,4 @@ TODO
 
 # Security
 
-As a distributed computing framework, Edith enables the remote execution of arbitrary code. You should only install Edith / Tripsitter workers within networks that you trust. This is standard among distributed computing frameworks, but is worth repeating.
+As a distributed computing framework, Bondman enables the remote execution of arbitrary code. You should only install Bondman workers within networks that you trust. This is standard among distributed computing frameworks, but is worth repeating.
