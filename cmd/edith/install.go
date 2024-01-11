@@ -183,47 +183,6 @@ const ansiblePlaybook = `
         groups: docker
         append: yes
 
-    - name: Check if NVM is installed
-      stat:
-        path: "{{ ansible_env.HOME }}/.nvm/nvm.sh"
-      register: nvm_installed 
-
-    - name: Display nvm_installed
-      debug:
-        msg: "{{ nvm_installed }}"
-
-    - name: Install NVM
-      shell: |
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
-      args:
-        executable: /bin/bash
-      become: no
-      when: not nvm_installed.stat.exists
-
-    - name: Install Node.js 16 and update npm 
-      shell: |
-        export NVM_DIR="$HOME/.nvm"
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-        nvm install 16.19.1
-        nvm use v16.19.1
-        npm i -g npm pm2
-      args:
-        executable: /bin/bash
-      become: no
-    
-    - name: Run pm2 startup and extract command
-      shell: |
-        export NVM_DIR="$HOME/.nvm"
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-        pm2 startup
-      args:
-        executable: /bin/bash
-      become: yes
-
-    - name: Run pm2 startup command as superuser
-      shell: "{{ pm2_startup_command }}"
-      become: yes
-
     - name: Install Minikube
       block:
         - name: Install conntrack (required for Minikube)
