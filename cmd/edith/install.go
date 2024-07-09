@@ -248,19 +248,22 @@ const ansiblePlaybook = `
         - name: Create Minikube service file
           copy:
             content: |
-              [Unit]
-              Description=Minikube
+	      [Unit]
+              Description=Minikube with Tunnel
               After=network.target
-        
+
               [Service]
               User=root
               Group=root
-              Type=oneshot
+              Type=forking
               RemainAfterExit=yes
               Environment="MINIKUBE_HOME=/root"
-              ExecStart=/usr/local/bin/minikube start --wait=all --cpus=2 --memory=4GB --force
-              ExecStop=/usr/local/bin/minikube stop
-        
+              ExecStartPre=/usr/local/bin/minikube start --wait=all --cpus=8 --memory=32GB --force
+              ExecStart=/bin/bash -c '/usr/local/bin/minikube tunnel &'
+              ExecStop=/bin/bash -c '/usr/local/bin/minikube tunnel --cleanup ; /usr/local/bin/minikube stop'
+              Restart=on-failure
+              RestartSec=5
+
               [Install]
               WantedBy=multi-user.target
             dest: /etc/systemd/system/minikube.service
